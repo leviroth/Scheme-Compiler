@@ -1,0 +1,15 @@
+(executable
+ (name compiler)
+ (libraries base stdio)
+)
+
+(ocamllex lexer)
+
+; (menhir
+;  (modules parser)
+;  (flags --explain --dump --external-tokens Tok)
+;  (infer true))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))
