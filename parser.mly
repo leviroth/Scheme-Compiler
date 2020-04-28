@@ -6,72 +6,82 @@
 %token Not And Or
 %token Let Lets Letr
 %token Begin Do
-%token If When Case Cond
+%token If /* When */ Case Cond Else
 %token Lpar Rpar
 %token Quote Dot Arrow Hash
 %token Eof
 
 
 %start <Ast.form option> form
-%{open Ast}%
+%{ open Ast %}
 
-let sexp(x) ==
-  | LPAR; ~ = x; RPAR; < >
+%%
+
+let sexp(X) ==
+  | Lpar; ~ = X; Rpar; < >
 
 let form :=
-  | ~ = expr EOF? < Some >
-  | ~ = def EOF? < Some >
-  | EOF { None }
+  | ~ = expr; Eof?; < Some >
+  | ~ = def; Eof?; < Some >
+  | Eof; { None }
 
 let def ==
-  | sexp(Def; ~ = Ident; ~ = expr <Defv>)
-  | sexp(Def; Lpar; ~ = Ident; ~ = list(Ident); Rpar; ~ = body; < Deff >)
-  | sexp(Def; Lpar; ~ = Ident; ~ = list(Ident); Dot; ~ = Ident ; Rpar; ~ = body < Deffl >)
+  | sexp(Def; ~ = Ident; ~ = expr; <Defv>)
+  | sexp(Def; Lpar; name = Ident; args = list(Ident); Rpar; ~ = body; { Deff(name, args, body) })
+  | Lpar; Def; Lpar; ~ = Ident; ~ = list(Ident); Dot; ~ = Ident ; Rpar; ~ = body; Rpar;< Deffl >
 
 let expr ==
-  | ~ = constant <>
-  | ~ = Ident < Ident >
+  | ~ = constant; <>
+  | ~ = Ident; < Ident >
   | sexp(Quote; ~ = expr; < Quote >)
-  | sexp(Lambda; ~ = sexp(list(ident)); ~ = body; < Lambda >)
-  | sexp(If; ~ = expr; ~ = expr; ~ = option(expr) < If >)
-  | sexp(And; ~ = list(expr) < And >)
-  | sexp(Or; ~ = list(expr) < Or >)
-  | sexp(Let; Lpar; ~ = list(binding_spec); Rpar; ~ = body < Let >)
-  | sexp(Lets; Lpar; ~ = list(binding_spec); Rpar; ~ = body < Lets >)
-  | sexp(Letr; Lpar; ~ = list(binding_spec); Rpar; ~ = body < Letr >)
-  | sexp(Begin; ~ = nonempty_list(expr) < Begin >)
-  | sexp(Cond, ~ = nonempty_list(cond_clause); ~ = option(nonempty_list(expr)) < Cond >)
+  | Lpar ;Lambda; Lpar; ~ = list(ident); Rpar; ~ = body; Rpar; < Lambda >
+  | sexp(If; e1 = expr; e2 = expr; oe = option(expr);
+    { match oe with | Some e -> Ife(e1, e2, e) | None -> If(e1, e2) })
+  | Lpar; And; ~ = list(expr); Rpar; < And >
+  | Lpar; Or; ~ = list(expr); Rpar; < Or >
+  | Lpar; Let; Lpar; ~ = list(binding_spec); Rpar; ~ = body; Rpar; < Let >
+  | Lpar; Lets; Lpar; ~ = list(binding_spec); Rpar; ~ = body; Rpar; < Lets >
+  | Lpar; Letr; Lpar; ~ = list(binding_spec); Rpar; ~ = body; < Letr >
+  | sexp(Begin; ~ = nonempty_list(expr); < Begin >)
+  | sexp(Cond, ~ = nonempty_list(cond_clause); ~ = optional; < Cond >)
+  | sexp(Case, ~ = expr; ~ = nonempty_list(case_clause); ~ = optional; < Case >)
   (* TODO Implement Do *)
 
 let body ==
-  | defs = list(def); exprs = nonempty_list(exprs) { {defs: defs; exprs: exprs} }
+  | defs = list(def); exprs = nonempty_list(expr); { {defs: defs; exprs: exprs} }
 
 let binding_spec ==
-  | Lpar; ~ = ident; ~ = expr; Rpar { ident * expr }
+  | Lpar; ~ = ident; ~ = expr; Rpar; { ident * expr }
 
 let cond_clause ==
-  | Lpar; ~ = expr; ~ = nonempty_list(expr); Rpar < >
+  | Lpar; ~ = expr; ~ = nonempty_list(expr); Rpar; < >
 
 let case_clause ==
-  | Lpar; Lpar; ~ = list()
+  | Lpar; Lpar; ~ = list(datum); Rpar; ~ = nonempty_list(expr); Rpar; <  >
+
+let optional ==
+  | option(Lpar; Else; ~ = nonempty_list(expr); Rpar; < >)
+
+let ident_raw_str ==
+  | ~ = ident; < >
 
 let ident ==
-  | ~ = Ident < String >
+  | ~ = Ident; < String >
 
 let datum ==
-  | ~ = constant <>
-  | ~ = Ident < Symbol > (* Symbol *)
-  | ~ = list < >
-  | ~ = Hash; Lpar; ~ = list(datum); Rpar < Vector >
+  | ~ = constant; <>
+  | ~ = Ident; < Symbol > (* Symbol *)
+  | ~ = list; < >
+  | ~ = Hash; Lpar; ~ = list(datum); Rpar; < Vector >
 
 let list ==
-  | Lpar; ~ = list(datum); Rpar < List >
-  | Lpar; ~ = nonempty_list(datum); Dot; ~ = datum; Rpar < Listd >
-  | Quote; ~ = datum < Quote >
-  | Lpar; Quote; ~ = datum; Rpar < Quote >
+  | Lpar; ~ = list(datum); Rpar; < List >
+  | Lpar; ~ = nonempty_list(datum); Dot; ~ = datum; Rpar; < Listd >
+  | Quote; ~ = datum; < Quote >
+  | Lpar; Quote; ~ = datum; Rpar; < Quote >
 
 let constant ==
-  | True { Bool(true) }
-  | False { Bool(false) }
-  | num = Fixnum { Fixnum(num) }
-  | str = String { String(str) }
+  | True; { Bool(true) }
+  | False; { Bool(false) }
+  | num = Fixnum; { Fixnum(num) }
+  | str = String; { String(str) }

@@ -5,10 +5,12 @@
 
 (ocamllex lexer)
 
-; (menhir
-;  (modules parser)
-;  (flags --explain --dump --external-tokens Tok)
-;  (infer true))
+(menhir
+ (modules parser)
+ (flags -la 2))
+
+; (rule
+;   (with-stdin-from prog.in (run ./compiler.exe)))
 
 (env
   (dev

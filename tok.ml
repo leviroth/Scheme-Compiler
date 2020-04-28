@@ -10,7 +10,7 @@ type token =
   | Or | And | Not
   | Let | Lets | Letr
   | Begin | Do
-  | If | When | Case | Cond
+  | If | When | Case | Cond | Else
   (* Syntactic glue *)
   | Lpar | Rpar
   | Quote | Dot | Arrow | Hash

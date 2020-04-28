@@ -5,7 +5,7 @@
 # @version 0.1
 
 default:
-	dune build gui.exe
+	dune build compiler.exe
 
 
 # end
