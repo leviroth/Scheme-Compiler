@@ -19,7 +19,7 @@ let letter = ['a'-'z' 'A'-'Z']
 let digit = ['0' - '9']
 
 (* Variables - lifted out of the language definition *)
-let special_init = ['!' '$' '%' '&' '*' '/' ':' '<' '=' '>' '?' '^' '_' '~']
+let special_init = ['!' '$' '%' '&' '*' '+' '-' '/' ':' '<' '=' '>' '?' '^' '_' '~']
 let special_sub = ['+' '-' '.' '@']
 let initial = letter | special_init
 let subsequent = initial | digit | special_sub
@@ -30,15 +30,15 @@ let fixnum = digit+
 let string = '\"' _* '\"'
 
 (* Whitespace *)
-let white = [' ' '\t']+
-let newline = '\r' | '\n' | "\r\n"
+let white = [' ' '\t' ]+
+let newline = '\r' | '\n' | "\r\n" | "\n\r"
 
 (* TODO check Case-Sensivity*)
 
 rule read =
   parse
   | white { read lexbuf }
-
+  | newline  { next_line lexbuf; read lexbuf }
   | ident { Ident (Lexing.lexeme lexbuf) }
 
   | "#t" { True }
@@ -51,7 +51,7 @@ rule read =
   | "let" { Let } | "let*" { Lets } | "letr" { Letr }
   | "begin" { Begin }
   | "do" { Do }
-  |  "if" { If } | "when" { When } | "case" { Case } | "cond" { Cond } | "else" { Else }
+  |  "if" { If } | "case" { Case } | "cond" { Cond } | "else" { Else }
   | "or" { Or } | "not" { Not } | "and" { And }
   | '(' { Lpar } | ')' { Rpar }
   | '\'' { Quote } | "quote" { Quote } | "=>" { Arrow } | "#" { Hash }

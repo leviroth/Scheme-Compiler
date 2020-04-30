@@ -1,7 +1,13 @@
 (executable
  (name compiler)
- (libraries base stdio)
+ (libraries base stdio sexp_pretty)
 )
+
+(rule
+ (target transformed.txt)
+ (action
+  (with-stdout-to prog.out
+   (with-stdin-from prog.in (run compiler.exe)))))
 
 (ocamllex lexer)
 
@@ -9,8 +15,6 @@
  (modules parser)
  (flags -la 2))
 
-; (rule
-;   (with-stdin-from prog.in (run ./compiler.exe)))
 
 (env
   (dev
