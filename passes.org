@@ -1,0 +1,91 @@
+#+TITLE: Passes
+
+
+* Primitives
+muessen erkennbar sein, um diese aus der Runtime aufzurufen
+
+* Environment / Adresses
+
+* Gensym?
+
+
+* let*
+#+BEGIN_SRC scheme
+(let* ((x 2) (y (+ x 4))) y)
+; ->
+((lambda (x) ((lambda (y) y) (+ x 4))) 2)
+#+END_SRC
+* named let loop
+#+BEGIN_SRC scheme
+(let loop ([x ivx] [y ivy] …)
+  body)
+
+(letrec ([loop (lambda (x y …)
+                 body)])
+  (loop ivx ivy …))
+#+END_SRC
+* letrec
+eine Variable darf nur einmal vorkommen. Der init einer Variable muss berechnet
+werden koennen, ohne auf eine andere Variable zu verweisen oder dies zu
+berechnen. (Grund ist Call-by-value)
+#+BEGIN_SRC scheme
+(letrec ((even?
+          (lambda (n)
+            (if (zero? n)
+                #t
+                (odd? (- n 1)))))
+         (odd?
+          (lambda (n)
+            (if (zero? n)
+                #f
+                (even? (- n 1))))))
+  (even? 88))
+
+(letrec ([x1 e1] ... [xn en]) body)
+;; ->
+→ (let ([x1 undefined] ... [xn undefined])
+(let ([t1 e1] ... [tn en])
+(set! x1 t1)
+...
+(set! xn tn))
+body)
+#+END_SRC
+* Let desugar
+#+BEGIN_SRC scheme
+(let ((x e) ..) body)
+;; ->
+((lambda (x ..) body) e)
+#+END_SRC
+
+* and to if
+* or to if
+* Do
+TODO
+* cond
+#+BEGIN_SRC scheme
+(cond
+  ((> 1 2) 1)
+  ((> 2 3) 2)
+)
+;
+(if (> 2 1) 1 (if (> 2 3) 2 #<undef>))
+#+END_SRC
+* case
+#+BEGIN_SRC scheme
+(case (* 2 3)
+    ((2 3) 'prime)
+    ((1 4) 'composite))
+; ->
+; memv -> keine Primitive, Funktion welche prueft, ob element in liste ist. benutzt eqv
+(let ((t (* 2 3)))
+  (if (memv t '(2 3))
+      'prime
+      (if (memv t '(1 4))
+          'composite
+          #<undef>))
+#+END_SRC
+* begin
+#+BEGIN_SRC scheme
+(begin 2 3 4)
+((lambda () 2 ((lambda () 3 ((lambda () 4)))))
+#+END_SRC

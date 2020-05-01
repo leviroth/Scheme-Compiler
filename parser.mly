@@ -40,15 +40,15 @@ let expr :=
   | sexp(Lambda; Lpar; ~ = list(ident); Rpar; ~ = body; < Lambda >)
   | sexp(If; e1 = expr; e2 = expr; oe = option(expr);
     { match oe with | Some e -> Ife(e1, e2, e) | None -> If(e1, e2) })
-  | sexp(And; ~ = list(expr); < And >)
-  | sexp(Or; ~ = list(expr); < Or >)
+  | sexp(And; ~ = option(nonempty_list(expr)); < And >)
+  | sexp(Or; ~ = option(nonempty_list(expr)); < Or >)
   | sexp(Let; Lpar; ~ = list(binding_spec); Rpar; ~ = body; < Let >)
   | sexp(Lets; Lpar; ~ = list(binding_spec); Rpar; ~ = body; < Lets >)
   | sexp(Letr; Lpar; ~ = list(binding_spec); Rpar; ~ = body; < Letr >)
   | sexp(Begin; ~ = nonempty_list(expr); < Begin >)
   /* TODO Fix Cond + Case */
-  /* | sexp(Cond; ~ = nonempty_list(cond_clause); ~ = optional; < Cond >) */
-  /* | sexp(Case; ~ = expr; ~ = nonempty_list(case_clause); ~ = optional; < Case >) */
+  | sexp(Cond; ~ = nonempty_list(cond_clause); ~ = optional; < Cond >)
+  | sexp(Case; ~ = expr; ~ = nonempty_list(case_clause); ~ = optional; < Case >)
   (* TODO Implement Do *)
 
 let body :=
@@ -61,11 +61,11 @@ let cond_clause :=
   | Lpar; ~ = expr; ~ = nonempty_list(expr); Rpar; < >
 
 let case_clause :=
-  | Lpar; Lpar; ~ = list(datum); Rpar; ~ = nonempty_list(expr); Rpar; <  >
+  | Lpar; Lpar; ~ = option(nonempty_list(datum)); Rpar; ~ = nonempty_list(expr); Rpar; <  >
 
 /* For Cond / Case */
-/* let optional := */
-/*   | option(Lpar; Else; ~ = nonempty_list(expr); Rpar; < >) */
+let optional :=
+  | option(Lpar; Else; ~ = nonempty_list(expr); Rpar; < >)
 
 let ident :=
   | ~ = Ident; < String >

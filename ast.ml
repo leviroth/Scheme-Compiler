@@ -18,12 +18,12 @@ type expr =
   | Ife of expr * expr * expr
   | Set of expr * expr
   (* TODO Include the other 2 posibble Cond Forms *)
-  | Cond of (expr * expr list) list * expr option
-  | Case of expr * (expr list option * expr list) * expr list option
+  | Cond of (expr * expr list) list * expr list option
+  | Case of expr * (expr list option * expr list) list * expr list option
   (* TODO Implement Do *)
   | Do
-  | Or of expr list
-  | And of expr list
+  | Or of expr list option
+  | And of expr list option
   | Not of expr
   | Begin of expr list
   (* TODO Named let-Loop  *)
@@ -94,8 +94,10 @@ and pp_expr expr depth =
   | Cond _ -> "Cond not implemented"
   | Case _ -> "Case not implemented"
   | Do -> "Not implemented"
-  | Or (exprs) -> pp_sexp ("or " ^ (pp_expr_list exprs newd ~pars:false ()))
-  | And (exprs) -> pp_sexp ("or " ^ (pp_expr_list exprs newd ~pars:false ()))
+  | Or (Some exprs) -> pp_sexp ("or " ^ (pp_expr_list exprs newd ~pars:false ()))
+  | Or (None) -> pp_sexp "or"
+  | And (Some exprs) -> pp_sexp ("or " ^ (pp_expr_list exprs newd ~pars:false ()))
+  | And (None) -> pp_sexp "and"
   | Not (expr) -> pp_sexp ("not " ^ (pp_expr expr newd))
   | Begin (exprs) -> pp_sexp ("Begin" ^ (pp_expr_list exprs newd ~pars:false ()))
   | Let (var_expr_list, body) -> pp_sexp ("let " ^ (pp_var_expr_list var_expr_list newd) ^ (pp_body body newd))
