@@ -1,5 +1,6 @@
 (executable
  (name compiler)
+ (modes byte exe)
  (libraries base stdio sexp_pretty)
 )
 
@@ -10,7 +11,6 @@
    (with-stdin-from prog.in (run compiler.exe)))))
 
 (ocamllex lexer)
-
 (menhir
  (modules parser)
  (flags -la 2))

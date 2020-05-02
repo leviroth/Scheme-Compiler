@@ -6,6 +6,7 @@
 
 default:
 	dune build compiler.exe
+	dune build compiler.bc
 
 
 # end

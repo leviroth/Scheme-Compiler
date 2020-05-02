@@ -14,10 +14,10 @@ let parse_with_error lexbuf =
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some value ->
-    print_endline (pp_form value);
+    value |> Desugar.desugar |> Ast.pp_form |> print_endline;
     parse_and_print lexbuf
   | None -> print_endline "Reached EOF"
 
 let () =
-  let lexbuf = Lexing.from_channel stdin in
+  let lexbuf = Lexing.from_string "(or 1 2 3 4)" in
   parse_and_print lexbuf;
