@@ -14,6 +14,7 @@ let parse_with_error lexbuf =
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some value ->
+    print_s ([%sexp_of: Ast.form] value);
     value |> Desugar.desugar |> Ast.pp_form |> print_endline;
     parse_and_print lexbuf
   | None -> print_endline "Reached EOF"

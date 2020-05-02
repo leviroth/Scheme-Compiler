@@ -38,6 +38,7 @@ and form =
   | Def of definition
   | Expr of expr
 and body = { defs : definition list; exprs : expr list }
+[@@deriving sexp]
 
 let indent = 2
 

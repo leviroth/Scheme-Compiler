@@ -2,6 +2,7 @@
  (name compiler)
  (modes byte exe)
  (libraries base stdio sexp_pretty)
+ (preprocess (pps ppx_jane))
 )
 
 (rule
