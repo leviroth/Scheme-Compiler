@@ -30,7 +30,6 @@ let def :=
   | sexp(Def; Lpar; name = Ident; args = list(Ident); Rpar; ~ = body; { Deff(name, args, body) })
   | sexp(Def; Lpar; ~ = Ident; ~ = list(Ident); Dot; ~ = Ident ; Rpar; ~ = body; < Deffl >)
 
-/* TODO Application regel */
 let expr :=
   | ~ = constant; <>
   | ~ = Ident; < Ident >
@@ -46,7 +45,6 @@ let expr :=
   | sexp(Lets; Lpar; ~ = list(binding_spec); Rpar; ~ = body; < Lets >)
   | sexp(Letr; Lpar; ~ = list(binding_spec); Rpar; ~ = body; < Letr >)
   | sexp(Begin; ~ = nonempty_list(expr); < Begin >)
-  /* TODO Fix Cond + Case */
   | sexp(Cond; ~ = nonempty_list(cond_clause); ~ = optional; < Cond >)
   | sexp(Case; ~ = expr; ~ = nonempty_list(case_clause); ~ = optional; < Case >)
   (* TODO Implement Do *)
@@ -72,7 +70,7 @@ let ident :=
 
 let datum :=
   | ~ = constant; <>
-  | ~ = Ident; < Symbol > (* Symbol *)
+  | ~ = Ident; < Symbol >
   | ~ = lst; < >
   | Hash; Lpar; ~ = list(datum); Rpar; < Vector >
 
